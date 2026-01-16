@@ -1,0 +1,313 @@
+/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+@use '@ngxpert/hot-toast/styles';
+
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: (
+      plain-family: 'Inter',
+      brand-family: 'Inter',
+      bold-weight: 600,
+      medium-weight: 500,
+      regular-weight: 400,
+    ),
+    density: 0,
+  ));
+}
+
+
+
+// Professional color palette
+$primary-color: #1976d2;
+$secondary-color: #424242;
+$accent-color: #ff4081;
+$background-color: #f5f5f5;
+$card-background: #ffffff;
+$text-color: #212121;
+$border-color: #e0e0e0;
+
+body {
+  margin: 0;
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    color-scheme: light;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+}
+
+// Professional admin panel styles
+.admin-panel {
+  .mat-toolbar {
+    background: linear-gradient(135deg, $primary-color 0%, darken($primary-color, 10%) 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .sidenav-container {
+    height: 100vh;
+  }
+
+  .sidenav {
+    width: 280px;
+    background: $card-background;
+    border-right: 1px solid $border-color;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+
+    .mat-nav-list {
+      padding-top: 20px;
+
+      .mat-list-item {
+        margin: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background-color: rgba($primary-color, 0.1);
+          transform: translateX(4px);
+        }
+
+        &.active {
+          background-color: rgba($primary-color, 0.15);
+          border-left: 4px solid $primary-color;
+          color: $primary-color;
+          font-weight: 500;
+        }
+
+        .mat-icon {
+          color: $secondary-color;
+          margin-right: 12px;
+        }
+      }
+    }
+  }
+
+  .content {
+    padding: 24px;
+    background-color: $background-color;
+    min-height: calc(100vh - 64px);
+  }
+
+  // Dashboard cards
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+
+    .mat-card {
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid $border-color;
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      }
+
+      .mat-card-header {
+        .mat-card-title {
+          color: $primary-color;
+          font-weight: 600;
+          font-size: 1.1rem;
+        }
+      }
+
+      .mat-card-content {
+        h2 {
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: $text-color;
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  // Data tables
+  .mat-table {
+    background: $card-background;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-top: 20px;
+
+    .mat-header-row {
+      background: linear-gradient(135deg, $primary-color 0%, darken($primary-color, 5%) 100%);
+      color: white;
+
+      .mat-header-cell {
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    .mat-row {
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: rgba($primary-color, 0.05);
+      }
+
+      .mat-cell {
+        border-bottom: 1px solid $border-color;
+      }
+    }
+  }
+
+  // Buttons
+  .mat-raised-button {
+    border-radius: 8px;
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+
+    &.mat-primary {
+      background: linear-gradient(135deg, $primary-color 0%, darken($primary-color, 10%) 100%);
+
+      &:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transform: translateY(-2px);
+      }
+    }
+
+    &.mat-warn {
+      background: linear-gradient(135deg, #f44336 0%, darken(#f44336, 10%) 100%);
+    }
+  }
+
+  // Login form
+  .login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+
+    .login-card {
+      background: $card-background;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 420px;
+      border: 1px solid rgba(255,255,255,0.1);
+
+      h2 {
+        text-align: center;
+        margin-bottom: 2rem;
+        color: $text-color;
+        font-weight: 600;
+        font-size: 1.8rem;
+      }
+
+      .mat-form-field {
+        width: 100%;
+        margin-bottom: 1.5rem;
+
+        .mat-mdc-input-element {
+          border-radius: 8px;
+        }
+      }
+
+      .login-btn {
+        width: 100%;
+        margin-top: 1.5rem;
+        padding: 12px;
+        font-size: 1rem;
+      }
+    }
+  }
+
+  // Page headers
+  h1 {
+    color: $text-color;
+    font-weight: 600;
+    margin-bottom: 24px;
+    font-size: 2rem;
+    border-bottom: 2px solid $primary-color;
+    padding-bottom: 12px;
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    .sidenav {
+      width: 240px;
+    }
+
+    .content {
+      padding: 16px;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .mat-table {
+      font-size: 0.8rem;
+    }
+  }
+}
+
+
+
+//mat-icon
+mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  vertical-align: middle;
+}
+
+
+button[matButton] {
+  @include mat.button-overrides((
+    filled-container-shape: 6px,
+    outlined-container-shape: 6px,
+    text-container-shape: 6px,
+    protected-container-shape: 6px,
+    tonal-container-shape: 6px,
+    filled-container-height: 36px,
+    outlined-container-height: 36px,
+    text-container-height: 36px,
+    protected-container-height: 36px,
+    tonal-container-height: 36px,
+  ));
+}
+
+button[matIconButton] {
+  @include mat.icon-button-overrides((
+    container-shape: 6px,
+  ));
+}
+
+
+mat-sidenav {
+  @include mat.sidenav-overrides((
+    container-width: 250px,
+    container-shape: 0px,
+    container-background-color: white,
+    container-divider-color: var(--mat-sys-outline-variant),
+  ));
+
+  @include mat.list-overrides((
+    active-indicator-color: var(--mat-sys-primary),
+    active-indicator-shape: 6px,
+    list-item-one-line-container-height: 40px,
+  ));
+}
+
+
+.mdc-notched-outline__notch {
+  border-right: none !important;
+}
