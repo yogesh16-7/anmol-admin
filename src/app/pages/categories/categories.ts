@@ -1,14 +1,17 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { ApiService, Category } from '../../services/api';
 import { Toaster } from '../../services/toaster';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { CategoryDialogComponent, CategoryDialogData } from '../../components/category-dialog/category-dialog';
 
 @Component({
   selector: 'app-categories',
-  imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule, MatDialogModule],
   template: `
     <h1>Categories Management</h1>
     <button mat-raised-button color="primary" (click)="addCategory()">
@@ -19,14 +22,6 @@ import { MatIconModule } from '@angular/material/icon';
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef>Name</th>
         <td mat-cell *matCellDef="let category">{{ category.name }}</td>
-      </ng-container>
-      <ng-container matColumnDef="icon">
-        <th mat-header-cell *matHeaderCellDef>Icon</th>
-        <td mat-cell *matCellDef="let category">{{ category.icon }}</td>
-      </ng-container>
-      <ng-container matColumnDef="color">
-        <th mat-header-cell *matHeaderCellDef>Color</th>
-        <td mat-cell *matCellDef="let category">{{ category.color }}</td>
       </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>Actions</th>
@@ -53,27 +48,62 @@ import { MatIconModule } from '@angular/material/icon';
     }
   `]
 })
-export class CategoriesComponent implements OnInit {
+export class CategoriesComponent {
+  route = inject(ActivatedRoute);
   api = inject(ApiService);
   toaster = inject(Toaster);
+  dialog = inject(MatDialog);
 
   categories: Category[] = [];
-  displayedColumns: string[] = ['name', 'icon', 'color', 'actions'];
+  displayedColumns: string[] = ['name', 'actions'];
 
-  ngOnInit() {
-    this.loadCategories();
-  }
-
-  loadCategories() {
-    this.api.getCategories().subscribe(data => this.categories = data);
+  constructor() {
+    const data = this.route.snapshot.data['categories'] as Category[];
+    if (data) {
+      this.categories = data;
+    }
   }
 
   addCategory() {
-    this.toaster.info('Add category dialog not implemented yet');
+    const dialogRef = this.dialog.open(CategoryDialogComponent, {
+      width: '500px',
+      data: {} as CategoryDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.api.createCategory(result).subscribe({
+          next: () => {
+            this.toaster.success('Category created successfully');
+            this.reloadCategories();
+          },
+          error: (error) => {
+            this.toaster.error('Failed to create category');
+          }
+        });
+      }
+    });
   }
 
   editCategory(category: Category) {
-    this.toaster.info('Edit category dialog not implemented yet');
+    const dialogRef = this.dialog.open(CategoryDialogComponent, {
+      width: '500px',
+      data: { category } as CategoryDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.api.updateCategory(category.id, result).subscribe({
+          next: () => {
+            this.toaster.success('Category updated successfully');
+            this.reloadCategories();
+          },
+          error: (error) => {
+            this.toaster.error('Failed to update category');
+          }
+        });
+      }
+    });
   }
 
   deleteCategory(id: string) {
@@ -81,12 +111,28 @@ export class CategoriesComponent implements OnInit {
       this.api.deleteCategory(id).subscribe({
         next: () => {
           this.toaster.success('Category deleted successfully');
-          this.loadCategories();
+          this.reloadCategories();
         },
-        error: (error) => {
-          this.toaster.error('Failed to delete category');
+        error: (error: any) => {
+          if (error.error && error.error.message) {
+            this.toaster.error(error.error.message);
+          } else {
+            this.toaster.error('Failed to delete category');
+          }
         }
       });
     }
+  }
+
+  private reloadCategories() {
+    this.api.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+      },
+      error: (error) => {
+        console.error('Failed to reload categories:', error);
+        this.toaster.error('Failed to reload categories');
+      }
+    });
   }
 }

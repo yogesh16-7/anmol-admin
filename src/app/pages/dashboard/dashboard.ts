@@ -1,9 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { ApiService, Product, Category, User } from '../../services/api';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { forkJoin } from 'rxjs';
+import { DashboardData } from './dashboard.resolver';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,66 +15,48 @@ import { forkJoin } from 'rxjs';
       <p class="subtitle">Monitor your e-commerce platform performance</p>
     </div>
 
-    @if (isLoading) {
-  <div class="loading-container" role="status" aria-live="polite">
-    <mat-icon class="loading-spinner" aria-hidden="true">refresh</mat-icon>
-    <p>Loading dashboard data...</p>
-  </div>
-} @else {
-  <div class="stats-grid">
-    <mat-card class="stat-card products-card">
-      <mat-card-content>
-        <div class="stat-icon">
-          <mat-icon>inventory_2</mat-icon>
-        </div>
-        <div class="stat-info">
-          <h2>{{ products.length }}</h2>
-          <p>Total Products</p>
-          <small>{{ inStockProducts }} in stock</small>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <div class="stats-grid">
+      <mat-card class="stat-card products-card">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>inventory_2</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h2>{{ products.length }}</h2>
+            <p>Total Products</p>
+            <small>{{ inStockProducts }} in stock</small>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
-    <mat-card class="stat-card categories-card">
-      <mat-card-content>
-        <div class="stat-icon">
-          <mat-icon>category</mat-icon>
-        </div>
-        <div class="stat-info">
-          <h2>{{ categories.length }}</h2>
-          <p>Categories</p>
-          <small>Product categories</small>
-        </div>
-      </mat-card-content>
-    </mat-card>
+      <mat-card class="stat-card categories-card">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>category</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h2>{{ categories.length }}</h2>
+            <p>Categories</p>
+            <small>Product categories</small>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
-    <mat-card class="stat-card users-card">
-      <mat-card-content>
-        <div class="stat-icon">
-          <mat-icon>people</mat-icon>
-        </div>
-        <div class="stat-info">
-          <h2>{{ users.length }}</h2>
-          <p>Registered Users</p>
-          <small>{{ adminUsers }} admins</small>
-        </div>
-      </mat-card-content>
-    </mat-card>
+      <mat-card class="stat-card users-card">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>people</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h2>{{ users.length }}</h2>
+            <p>Registered Users</p>
+            <small>{{ adminUsers }} admins</small>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
-    <mat-card class="stat-card revenue-card">
-      <mat-card-content>
-        <div class="stat-icon">
-          <mat-icon>attach_money</mat-icon>
-        </div>
-        <div class="stat-info">
-          <h2>{{ totalRevenue | number:'1.0-0' }}</h2>
-          <p>Estimated Revenue</p>
-          <small>Based on products</small>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </div>
-}
+
+    </div>
 
 
     <div class="recent-activity">
@@ -162,25 +145,6 @@ styles: [`
   color: #777;
 }
 
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 60px 20px;
-}
-
-.loading-spinner {
-  font-size: 48px;
-  animation: spin 1s linear infinite;
-  color: #1976d2;
-  margin-bottom: 12px;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
 .recent-activity {
   margin-top: 40px;
 }
@@ -199,13 +163,22 @@ styles: [`
 `]
 
 })
-export class DashboardComponent implements OnInit {
-  api = inject(ApiService);
+export class DashboardComponent {
+  route = inject(ActivatedRoute);
   products: Product[] = [];
   categories: Category[] = [];
   users: User[] = [];
   currentTime = new Date().toLocaleTimeString();
-  isLoading = true;
+  isLoading = false;
+
+  constructor() {
+    const data = this.route.snapshot.data['dashboard'] as DashboardData;
+    if (data) {
+      this.products = data.products;
+      this.categories = data.categories;
+      this.users = data.users;
+    }
+  }
 
   get totalRevenue(): number {
     return this.products.reduce((sum, product) => sum + product.price, 0);
@@ -217,29 +190,5 @@ export class DashboardComponent implements OnInit {
 
   get adminUsers(): number {
     return this.users.filter(u => u.isAdmin).length;
-  }
-
-  ngOnInit() {
-    this.loadData();
-  }
-
-  loadData() {
-    this.isLoading = true;
-    forkJoin({
-      products: this.api.getProducts(),
-      categories: this.api.getCategories(),
-      users: this.api.getUsers()
-    }).subscribe({
-      next: (result) => {
-        this.products = result.products;
-        this.categories = result.categories;
-        this.users = result.users;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Failed to load dashboard data:', error);
-        this.isLoading = false;
-      }
-    });
   }
 }

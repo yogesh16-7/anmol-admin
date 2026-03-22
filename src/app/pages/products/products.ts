@@ -1,4 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { ApiService, Product, Category } from '../../services/api';
 import { Toaster } from '../../services/toaster';
 import { CommonModule } from '@angular/common';
@@ -38,11 +39,7 @@ import { ProductDialogComponent, ProductDialogData } from '../../components/prod
     </div>
 
     <div class="table-container">
-      <div *ngIf="isLoading" class="loading-container">
-        <mat-icon class="loading-spinner">refresh</mat-icon>
-        <p>Loading products...</p>
-      </div>
-      <table *ngIf="!isLoading" mat-table [dataSource]="products" class="mat-elevation-z8">
+      <table mat-table [dataSource]="products" class="mat-elevation-z8">
         <ng-container matColumnDef="image">
           <th mat-header-cell *matHeaderCellDef>Image</th>
           <td mat-cell *matCellDef="let product">
@@ -199,7 +196,8 @@ import { ProductDialogComponent, ProductDialogData } from '../../components/prod
 `]
 
 })
-export class ProductsComponent implements OnInit {
+export class ProductsComponent {
+  route = inject(ActivatedRoute);
   api = inject(ApiService);
   toaster = inject(Toaster);
   dialog = inject(MatDialog);
@@ -208,38 +206,25 @@ export class ProductsComponent implements OnInit {
   products: Product[] = [];
   categories: Category[] = [];
   displayedColumns: string[] = ['image', 'name', 'price', 'category', 'inStock', 'actions'];
-  isLoading = true;
+  isLoading = false;
 
-  ngOnInit() {
-    this.loadData();
+  constructor() {
+    const data = this.route.snapshot.data['products'] as Product[];
+    if (data) {
+      this.products = data;
+    }
+    // Load categories separately since they're needed for the dialog
+    this.loadCategories();
   }
 
-  loadData() {
-    this.isLoading = true;
-    // Load categories first, then products
+  loadCategories() {
     this.api.getCategories().subscribe({
       next: (categories) => {
         this.categories = categories;
-        this.loadProducts();
       },
       error: (error) => {
         console.error('Failed to load categories:', error);
         this.toaster.error('Failed to load categories');
-        this.isLoading = false;
-      }
-    });
-  }
-
-  loadProducts() {
-    this.api.getProducts().subscribe({
-      next: (products) => {
-        this.products = products;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Failed to load products:', error);
-        this.toaster.error('Failed to load products');
-        this.isLoading = false;
       }
     });
   }
@@ -252,10 +237,10 @@ export class ProductsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.api.createProduct(result).subscribe({
+        this.api.createProduct(result.productData, result.imageFile).subscribe({
           next: () => {
             this.toaster.success('Product created successfully');
-            this.loadProducts();
+            this.reloadProducts();
           },
           error: (error) => {
             this.toaster.error('Failed to create product');
@@ -273,10 +258,10 @@ export class ProductsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.api.updateProduct(product.id, result).subscribe({
+        this.api.updateProduct(product.id, result.productData, result.imageFile).subscribe({
           next: () => {
             this.toaster.success('Product updated successfully');
-            this.loadProducts();
+            this.reloadProducts();
           },
           error: (error) => {
             this.toaster.error('Failed to update product');
@@ -291,12 +276,24 @@ export class ProductsComponent implements OnInit {
       this.api.deleteProduct(id).subscribe({
         next: () => {
           this.toaster.success('Product deleted successfully');
-          this.loadProducts();
+          this.reloadProducts();
         },
         error: (error) => {
           this.toaster.error('Failed to delete product');
         }
       });
     }
+  }
+
+  private reloadProducts() {
+    this.api.getProducts().subscribe({
+      next: (products) => {
+        this.products = products;
+      },
+      error: (error) => {
+        console.error('Failed to reload products:', error);
+        this.toaster.error('Failed to reload products');
+      }
+    });
   }
 }

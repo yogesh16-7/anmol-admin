@@ -1,14 +1,17 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { ApiService, User } from '../../services/api';
 import { Toaster } from '../../services/toaster';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { UserDialogComponent, UserDialogData } from '../../components/user-dialog/user-dialog';
 
 @Component({
   selector: 'app-users',
-  imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule, MatDialogModule],
   template: `
     <h1>Users Management</h1>
     <button mat-raised-button color="primary" (click)="addUser()">
@@ -57,27 +60,62 @@ import { MatIconModule } from '@angular/material/icon';
     }
   `]
 })
-export class UsersComponent implements OnInit {
+export class UsersComponent {
+  route = inject(ActivatedRoute);
   api = inject(ApiService);
   toaster = inject(Toaster);
+  dialog = inject(MatDialog);
 
   users: User[] = [];
   displayedColumns: string[] = ['name', 'email', 'phone', 'isAdmin', 'actions'];
 
-  ngOnInit() {
-    this.loadUsers();
-  }
-
-  loadUsers() {
-    this.api.getUsers().subscribe(data => this.users = data);
+  constructor() {
+    const data = this.route.snapshot.data['users'] as User[];
+    if (data) {
+      this.users = data;
+    }
   }
 
   addUser() {
-    this.toaster.info('Add user dialog not implemented yet');
+    const dialogRef = this.dialog.open(UserDialogComponent, {
+      width: '500px',
+      data: {} as UserDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.api.createUser(result).subscribe({
+          next: () => {
+            this.toaster.success('User created successfully');
+            this.reloadUsers();
+          },
+          error: (error: any) => {
+            this.toaster.error('Failed to create user');
+          }
+        });
+      }
+    });
   }
 
   editUser(user: User) {
-    this.toaster.info('Edit user dialog not implemented yet');
+    const dialogRef = this.dialog.open(UserDialogComponent, {
+      width: '500px',
+      data: { user } as UserDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.api.updateUser(user.id, result).subscribe({
+          next: () => {
+            this.toaster.success('User updated successfully');
+            this.reloadUsers();
+          },
+          error: (error: any) => {
+            this.toaster.error('Failed to update user');
+          }
+        });
+      }
+    });
   }
 
   deleteUser(id: string) {
@@ -85,12 +123,24 @@ export class UsersComponent implements OnInit {
       this.api.deleteUser(id).subscribe({
         next: () => {
           this.toaster.success('User deleted successfully');
-          this.loadUsers();
+          this.reloadUsers();
         },
-        error: (error) => {
+        error: (error: any) => {
           this.toaster.error('Failed to delete user');
         }
       });
     }
+  }
+
+  private reloadUsers() {
+    this.api.getUsers().subscribe({
+      next: (users) => {
+        this.users = users;
+      },
+      error: (error: any) => {
+        console.error('Failed to reload users:', error);
+        this.toaster.error('Failed to reload users');
+      }
+    });
   }
 }

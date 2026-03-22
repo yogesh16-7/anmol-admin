@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth';
 import { Router } from '@angular/router';
@@ -20,7 +21,8 @@ import { CommonModule } from '@angular/common';
     MatIconModule,
     MatButtonModule,
     MatToolbarModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatMenuModule
   ],
   template: `
     <div class="admin-panel">
@@ -33,19 +35,23 @@ import { CommonModule } from '@angular/common';
           <mat-nav-list>
             <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
               <mat-icon matListIcon>dashboard</mat-icon>
-              <span matLine>Dashboard</span>
+              <span matLine> Dashboard</span>
             </a>
             <a mat-list-item routerLink="/products" routerLinkActive="active">
               <mat-icon matListIcon>inventory_2</mat-icon>
-              <span matLine>Products</span>
+              <span matLine> Products</span>
             </a>
             <a mat-list-item routerLink="/categories" routerLinkActive="active">
               <mat-icon matListIcon>category</mat-icon>
-              <span matLine>Categories</span>
+              <span matLine> Categories</span>
             </a>
             <a mat-list-item routerLink="/users" routerLinkActive="active">
               <mat-icon matListIcon>people</mat-icon>
-              <span matLine>Users</span>
+              <span matLine> Users</span>
+            </a>
+            <a mat-list-item routerLink="/orders" routerLinkActive="active">
+              <mat-icon matListIcon>local_shipping</mat-icon>
+              <span matLine> Orders</span>
             </a>
           </mat-nav-list>
         </mat-sidenav>
@@ -53,9 +59,13 @@ import { CommonModule } from '@angular/common';
           <mat-toolbar class="mat-elevation-z4">
             <span style="font-weight: 500;">Welcome to Admin Panel</span>
             <span class="spacer"></span>
-            <button mat-icon-button (click)="logout()" matTooltip="Logout">
-              <mat-icon>logout</mat-icon>
+            <button mat-button [matMenuTriggerFor]="profileMenu">
+              <mat-icon>account_circle</mat-icon>
+              <span style="margin-left:8px">Profile</span>
             </button>
+            <mat-menu #profileMenu="matMenu">
+              <button mat-menu-item (click)="logout()">Sign Out</button>
+            </mat-menu>
           </mat-toolbar>
           <div class="content">
             <router-outlet></router-outlet>
