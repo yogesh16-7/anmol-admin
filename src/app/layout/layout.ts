@@ -33,23 +33,23 @@ import { CommonModule } from '@angular/common';
             <p style="color: #666; margin: 4px 0 0 0; font-size: 0.8rem;">Management System</p>
           </div>
           <mat-nav-list>
-            <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
+            <a mat-list-item routerLink="/dashboard" routerLinkActive="active" (click)="onNavItemClick()">
               <mat-icon matListIcon>dashboard</mat-icon>
               <span matLine> Dashboard</span>
             </a>
-            <a mat-list-item routerLink="/products" routerLinkActive="active">
+            <a mat-list-item routerLink="/products" routerLinkActive="active" (click)="onNavItemClick()">
               <mat-icon matListIcon>inventory_2</mat-icon>
               <span matLine> Products</span>
             </a>
-            <a mat-list-item routerLink="/categories" routerLinkActive="active">
+            <a mat-list-item routerLink="/categories" routerLinkActive="active" (click)="onNavItemClick()">
               <mat-icon matListIcon>category</mat-icon>
               <span matLine> Categories</span>
             </a>
-            <a mat-list-item routerLink="/users" routerLinkActive="active">
+            <a mat-list-item routerLink="/users" routerLinkActive="active" (click)="onNavItemClick()">
               <mat-icon matListIcon>people</mat-icon>
               <span matLine> Users</span>
             </a>
-            <a mat-list-item routerLink="/orders" routerLinkActive="active">
+            <a mat-list-item routerLink="/orders" routerLinkActive="active" (click)="onNavItemClick()">
               <mat-icon matListIcon>local_shipping</mat-icon>
               <span matLine> Orders</span>
             </a>
@@ -128,6 +128,12 @@ export class LayoutComponent {
 
   toggleSidenav() {
     this.isSidenavOpen = !this.isSidenavOpen;
+  }
+
+  onNavItemClick() {
+    if (this.isHandset) {
+      this.isSidenavOpen = false;
+    }
   }
 
   logout() {
