@@ -60,7 +60,7 @@ import { CommonModule } from '@angular/common';
             <button mat-icon-button (click)="toggleSidenav()" *ngIf="isHandset">
               <mat-icon>menu</mat-icon>
             </button>
-            <span style="font-weight: 500;">Welcome to Admin Panel</span>
+            <span style="font-weight: 500;">Admin Panel</span>
             <span class="spacer"></span>
             <button mat-button [matMenuTriggerFor]="profileMenu">
               <mat-icon>account_circle</mat-icon>
