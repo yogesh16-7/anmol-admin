@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, HostListener } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
@@ -27,7 +27,7 @@ import { CommonModule } from '@angular/common';
   template: `
     <div class="admin-panel">
       <mat-sidenav-container class="sidenav-container">
-        <mat-sidenav mode="side" opened class="sidenav">
+        <mat-sidenav [mode]="isHandset ? 'over' : 'side'" [opened]="!isHandset || isSidenavOpen" class="sidenav" (closedStart)="isSidenavOpen = false">
           <div class="logo-section" style="padding: 20px; text-align: center; border-bottom: 1px solid #e0e0e0; margin-bottom: 20px;">
             <h3 style="color: #1976d2; margin: 0; font-weight: 600;">Admin Panel</h3>
             <p style="color: #666; margin: 4px 0 0 0; font-size: 0.8rem;">Management System</p>
@@ -57,6 +57,9 @@ import { CommonModule } from '@angular/common';
         </mat-sidenav>
         <mat-sidenav-content>
           <mat-toolbar class="mat-elevation-z4">
+            <button mat-icon-button (click)="toggleSidenav()" *ngIf="isHandset">
+              <mat-icon>menu</mat-icon>
+            </button>
             <span style="font-weight: 500;">Welcome to Admin Panel</span>
             <span class="spacer"></span>
             <button mat-button [matMenuTriggerFor]="profileMenu">
@@ -91,11 +94,48 @@ import { CommonModule } from '@angular/common';
     .active {
       background: rgba(0, 0, 0, 0.1);
     }
+
+    @media (max-width: 768px) {
+      .sidenav-container {
+        height: 100vh;
+      }
+      .sidenav {
+        width: 100%;
+      }
+      .content {
+        padding: 12px;
+      }
+      mat-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .mat-toolbar-row,
+      .mat-toolbar-single-row {
+        width: 100%;
+      }
+    }
   `]
 })
 export class LayoutComponent {
   auth = inject(AuthService);
   router = inject(Router);
+
+  isHandset = window.innerWidth <= 768;
+  isSidenavOpen = !this.isHandset;
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: Event) {
+    const width = (event.target as Window).innerWidth;
+    this.isHandset = width <= 768;
+    if (!this.isHandset) {
+      this.isSidenavOpen = true;
+    }
+  }
+
+  toggleSidenav() {
+    this.isSidenavOpen = !this.isSidenavOpen;
+  }
 
   logout() {
     this.auth.logout();
