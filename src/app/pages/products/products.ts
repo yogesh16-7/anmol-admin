@@ -27,14 +27,13 @@ import { ProductDialogComponent, ProductDialogData } from '../../components/prod
     ReactiveFormsModule
   ],
   template: `
-
-
         <h1>Products Management</h1>
-      
+    <div class="page-header">
       <button mat-raised-button color="primary" (click)="openAddDialog()">
         <mat-icon>add</mat-icon>
         Add Product
       </button>
+    </div>
 
     <div class="table-container">
       <table mat-table [dataSource]="products" class="mat-elevation-z8">
