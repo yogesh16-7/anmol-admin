@@ -96,9 +96,6 @@ import { CommonModule } from '@angular/common';
     }
 
     @media (max-width: 768px) {
-      .sidenav-container {
-        height: 100vh;
-      }
       .sidenav {
         width: 100%;
       }
@@ -109,10 +106,6 @@ import { CommonModule } from '@angular/common';
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-      }
-      .mat-toolbar-row,
-      .mat-toolbar-single-row {
-        width: 100%;
       }
     }
   `]
