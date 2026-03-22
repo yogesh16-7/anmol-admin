@@ -29,7 +29,7 @@ import { ProductDialogComponent, ProductDialogData } from '../../components/prod
   template: `
     <div class="page-header">
       <div class="header-content">
-        <h1><mat-icon>inventory_2</mat-icon> Products Management</h1>
+        <h1>Products Management</h1>
       </div>
       <button mat-raised-button color="primary" (click)="openAddDialog()">
         <mat-icon>add</mat-icon>
